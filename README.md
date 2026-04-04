@@ -126,6 +126,15 @@ cd examples/component-linking && bash run.sh  # 22 tests
 > **Note**: The test scripts run the compiler via `dotnet run --project vendor/Fable/src/Fable.Cli`
 > which automatically resolves the WasmGC backend from the parent repo.
 
+## Releases
+
+Pushing a `v*` tag runs `.github/workflows/release.yml` and publishes GitHub Release assets for:
+- the platform-specific `Fable.Cli` compiler archives
+- a `Fable.WasmGc-net10.0.zip` build of the backend DLLs
+- a `Fable.WasmGc` NuGet package (`.nupkg`)
+
+NuGet upload is wired into the release workflow and stays skipped until the `NUGET_API_KEY` secret is configured.
+
 ### Compile Your Own F# Project
 
 1. Create an F# project:

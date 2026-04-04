@@ -108,7 +108,7 @@ jobs:
           cd win-x64 && zip -r ../fsharp-wasm-win-x64.zip . && cd ..
 
       - name: Publish NuGet package
-        if: ${{ secrets.NUGET_API_KEY != '' }}
+        if: secrets.NUGET_API_KEY != ''
         run: |
           dotnet nuget push publish/nuget/*.nupkg \
             --source https://api.nuget.org/v3/index.json \

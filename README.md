@@ -84,7 +84,7 @@ dotnet fable hello.fsproj --lang wasmgc
 
 - [.NET SDK 10.0+](https://dotnet.microsoft.com/download) (see `global.json`)
 - [Node.js 22+](https://nodejs.org/) (for running tests)
-- [`wasm-tools`](https://github.com/nickhutchinson/nickhutchinson.github.io/blob/master/nickhutchinson.github.io) (optional, for binary validation and Component Model)
+- [`wasm-tools`](https://github.com/bytecodealliance/wasm-tools) (optional, for binary validation and Component Model)
 
 ### 1. Clone with submodule
 

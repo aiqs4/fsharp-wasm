@@ -1171,6 +1171,8 @@ and transformCall (ctx: Ctx) (callee: Fable.Expr) (info: CallInfo) (typ: Fable.T
                 fun () -> tryMapInline               ctx importStem sel wArgs
                 // ── Set module: drop injected IComparer ─────────────────────────────────
                 fun () -> trySetInline               ctx importStem sel wArgs
+                // ── Async module: synchronous MVP ───────────────────────────────────────
+                fun () -> tryAsyncInline             ctx importStem sel wArgs ty
                 // ── Array module primitives ────────────────────────────────────────────
                 fun () -> tryArrayInline              transformExpr ctx sel info.Args wArgs typ
                 // ── List/Option primitives ─────────────────────────────────────────────

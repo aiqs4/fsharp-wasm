@@ -160,3 +160,68 @@ let trySetInline
         | Some (_, retTy), Some _ -> Some(WExpr.Call("Set_add", [wVal; WExpr.Call("Set_empty", [], retTy)], retTy))
         | _ -> None
     | _ -> None
+
+// ─────────────────────────────────────────────────────────────────
+// Async/Task — synchronous MVP
+// ─────────────────────────────────────────────────────────────────
+/// Intercept Fable's AsyncBuilder and Async LibCalls.
+/// For the WasmGC synchronous MVP, Async<T> is just T — all computations
+/// are evaluated immediately and synchronously.
+let tryAsyncInline
+        (_ctx: Ctx)
+        (importStem: string)
+        (selector: string)
+        (wArgs: WExpr list)
+        (ty: WType) : WExpr option =
+    match importStem with
+    | "AsyncBuilder" ->
+        match selector, wArgs with
+        // AsyncBuilder.return(builder, x) → x
+        // Fable passes the singleton builder instance as first arg
+        | "return", [_builder; wVal] -> Some wVal
+        | "return", [wVal] -> Some wVal
+        // AsyncBuilder.zero() → nop (unit)
+        | "zero", _ -> Some WExpr.Nop
+        // AsyncBuilder.delay(builder, f) → invoke f synchronously
+        | "delay", [_builder; wThunk] ->
+            let funcTypeIdx = _ctx.GetOrAddFuncType([], ty)
+            Some(WExpr.ClosureApply(wThunk, [], funcTypeIdx, 0, 0, ty))
+        | "delay", [wThunk] ->
+            let funcTypeIdx = _ctx.GetOrAddFuncType([], ty)
+            Some(WExpr.ClosureApply(wThunk, [], funcTypeIdx, 0, 0, ty))
+        // AsyncBuilder.returnFrom(builder, comp) → comp
+        | "returnFrom", [_builder; wComp] -> Some wComp
+        | "returnFrom", [wComp] -> Some wComp
+        // AsyncBuilder.bind(builder, comp, f) → f(comp)
+        | "bind", [_builder; wComp; wFunc] ->
+            let funcTypeIdx = _ctx.GetOrAddFuncType([ty], ty)
+            Some(WExpr.ClosureApply(wFunc, [wComp], funcTypeIdx, 0, 0, ty))
+        | "bind", [wComp; wFunc] ->
+            let funcTypeIdx = _ctx.GetOrAddFuncType([ty], ty)
+            Some(WExpr.ClosureApply(wFunc, [wComp], funcTypeIdx, 0, 0, ty))
+        // AsyncBuilder.singleton → nop (the builder instance is not needed)
+        | "singleton", _ -> Some WExpr.Nop
+        // AsyncBuilder.combine(builder, a, b) → sequence a then b
+        | "combine", [_builder; wA; wB] -> Some(WExpr.Sequence [wA; wB])
+        | "combine", [wA; wB] -> Some(WExpr.Sequence [wA; wB])
+        // All other AsyncBuilder methods — ignore builder, return last meaningful arg
+        | _, args ->
+            match args |> List.filter (fun a -> a <> WExpr.Nop) with
+            | [] -> Some WExpr.Nop
+            | xs -> Some (List.last xs)
+    | "Async" ->
+        match selector, wArgs with
+        // Async.RunSynchronously(comp) → comp (synchronous: just eval)
+        | "runSynchronously", [wComp] -> Some wComp
+        | "runSynchronously", (wComp :: _) -> Some wComp
+        // Async.StartImmediate(comp) → comp (synchronous: just eval, discard result)
+        | "startImmediate", [wComp] -> Some(WExpr.Sequence [wComp; WExpr.Nop])
+        | "startImmediate", (wComp :: _) -> Some(WExpr.Sequence [wComp; WExpr.Nop])
+        // Async.ignore(comp) → comp; nop
+        | "ignore", [wComp] -> Some(WExpr.Sequence [wComp; WExpr.Nop])
+        // Async.map(f, comp) → f(comp)  (synchronous apply)
+        | "map", [_f; wComp] -> Some wComp
+        // Default: return first arg (best effort)
+        | _, (first :: _) -> Some first
+        | _ -> Some WExpr.Nop
+    | _ -> None

@@ -2395,3 +2395,9 @@ let testSeqMapIndexed () : int =
 /// Seq.forall — all positive?
 let testSeqForall () : int =
     if Seq.forall (fun x -> x > 0) [1; 2; 3] then 1 else 0  // 1
+
+// ── Phase 5: Async (future work) ─────────────────────────────────
+// Async computation expressions require instance-method dispatch on the
+// AsyncBuilder singleton, which the WasmGC backend does not yet support.
+// The infrastructure (tryAsyncInline in WasmGcMathMap.fs) is in place for
+// when the builder pattern is wired through.

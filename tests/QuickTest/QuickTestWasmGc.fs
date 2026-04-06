@@ -2333,3 +2333,67 @@ let testMapFindRaises () : int =
         let m = Map.ofList [(1, 10); (2, 20)]
         Map.find 99 m
     with _ -> -1  // -1
+
+// ── Phase 2 continued: Map higher-order operations ───────────────
+
+/// Map.fold — sum all values
+let testMapFold () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    Map.fold (fun acc _k v -> acc + v) 0 m  // 60
+
+/// Map.iter — sum values via mutable
+let testMapIter () : int =
+    let mutable total = 0
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    Map.iter (fun _k v -> total <- total + v) m
+    total  // 60
+
+/// Map.filter — keep entries where value > 15
+let testMapFilter () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    let m2 = Map.filter (fun _k v -> v > 15) m
+    Map.count m2  // 2
+
+/// Map.exists — any value > 25?
+let testMapExists () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    if Map.exists (fun _k v -> v > 25) m then 1 else 0  // 1
+
+/// Map.forall — all values >= 10?
+let testMapForall () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    if Map.forall (fun _k v -> v >= 10) m then 1 else 0  // 1
+
+/// Map.map — double all values
+let testMapMap () : int =
+    let m = Map.ofList [(1, 10); (2, 20)]
+    let m2 = Map.map (fun _k v -> v * 2) m
+    Map.find 1 m2 + Map.find 2 m2  // 20 + 40 = 60
+
+// ── Phase 4: Additional Seq operations ───────────────────────────
+
+/// Seq.choose — filter+map
+let testSeqChoose () : int =
+    [1; 2; 3; 4; 5]
+    |> Seq.choose (fun x -> if x % 2 = 0 then Some (x * 10) else None)
+    |> Seq.sum  // 60
+
+/// Seq.collect — flatMap
+let testSeqCollect () : int =
+    [1; 2; 3]
+    |> Seq.collect (fun x -> [x; x * 10])
+    |> Seq.sum  // 1+10+2+20+3+30 = 66
+
+/// Seq.reduce — accumulate without init
+let testSeqReduce () : int =
+    [1; 2; 3; 4; 5] |> Seq.reduce (fun a b -> a + b)  // 15
+
+/// Seq.mapIndexed — use index
+let testSeqMapIndexed () : int =
+    [10; 20; 30]
+    |> Seq.mapi (fun i x -> i + x)
+    |> Seq.sum  // (0+10)+(1+20)+(2+30) = 63
+
+/// Seq.forall — all positive?
+let testSeqForall () : int =
+    if Seq.forall (fun x -> x > 0) [1; 2; 3] then 1 else 0  // 1

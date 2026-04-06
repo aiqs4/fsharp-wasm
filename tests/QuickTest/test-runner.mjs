@@ -689,6 +689,21 @@ check("Map.toList length → 3",              3, exp.testMapToList());
 check("Map.add+find 30→300",              300, exp.testMapLargeAddFind());
 check("Map.find missing → -1",             -1, exp.testMapFindRaises());
 
+console.log("\n─── Phase 2b: Map higher-order operations ─────");
+check("Map.fold sum values → 60",          60, exp.testMapFold());
+check("Map.iter sum via mutable → 60",     60, exp.testMapIter());
+check("Map.filter v>15 → 2",                2, exp.testMapFilter());
+check("Map.exists v>25 → 1",                1, exp.testMapExists());
+check("Map.forall v>=10 → 1",               1, exp.testMapForall());
+check("Map.map double → 60",               60, exp.testMapMap());
+
+console.log("\n─── Phase 4: Additional Seq operations ─────");
+check("Seq.choose even×10 → 60",           60, exp.testSeqChoose());
+check("Seq.collect flat → 66",             66, exp.testSeqCollect());
+check("Seq.reduce sum → 15",               15, exp.testSeqReduce());
+check("Seq.mapi i+x → 63",                63, exp.testSeqMapIndexed());
+check("Seq.forall >0 → 1",                  1, exp.testSeqForall());
+
 console.log(`\n────────────────────────────────────────────────`);
 console.log(`  ${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

@@ -1105,9 +1105,20 @@ and transformCall (ctx: Ctx) (callee: Fable.Expr) (info: CallInfo) (typ: Fable.T
         match trySpecializeCall ctx ident.Name info typ with
         | Some specialized -> specialized
         | None ->
-        // Direct function call (non-generic or unregistered generic).
-        // In library context, FuncNameAlias maps short→qualified for same-file recursive calls.
+        // Check if the identifier is a local variable typed as a closure (ref $AnyFn).
+        // If so, this is a higher-order call — emit ClosureApply instead of a direct Call.
         let actualName = ctx.FuncNameAlias |> Map.tryFind ident.Name |> Option.defaultValue ident.Name
+        match Map.tryFind ident.Name ctx.Locals with
+        | Some(WType.Ref(idx, _)) when idx = AnyFnTypeIdx ->
+            // This is a closure parameter — dispatch via ClosureApply.
+            // Use closureTypeIdx = 0 (sentinel) so fixClosureApply resolves it after all
+            // closure types are registered.
+            let wClosure = WExpr.LocalGet(ident.Name, WType.Ref(AnyFnTypeIdx, false))
+            let argTypes = wArgs |> List.map exprWType |> List.filter (fun t -> t <> WType.Void)
+            let funcTypeIdx = ctx.GetOrAddFuncType(argTypes, ty)
+            WExpr.ClosureApply(wClosure, wArgs, funcTypeIdx, 0, 0, ty)
+        | _ ->
+        // Direct function call (non-generic or unregistered generic).
         WExpr.Call(actualName, wArgs, ty)
     | Fable.Expr.Import(importInfo, _, _) ->
         // For string instance methods (IndexOf, Substring, etc.), Fable puts the
@@ -1144,6 +1155,8 @@ and transformCall (ctx: Ctx) (callee: Fable.Expr) (info: CallInfo) (typ: Fable.T
                 fun () -> tryResultInline             transformExpr ctx sel info.Args ty
                 // ── Map module: drop injected IComparer for ofList/empty ───────────────
                 fun () -> tryMapInline               ctx importStem sel wArgs
+                // ── Set module: drop injected IComparer ─────────────────────────────────
+                fun () -> trySetInline               ctx importStem sel wArgs
                 // ── Array module primitives ────────────────────────────────────────────
                 fun () -> tryArrayInline              transformExpr ctx sel info.Args wArgs typ
                 // ── List/Option primitives ─────────────────────────────────────────────

@@ -80,6 +80,59 @@ let rec remove (key: int) (tree: MapNode) : MapNode =
         elif key > k then Node(k, v, l, remove key r)
         else mergeInto r l
 
+/// Fold over all key-value pairs in ascending key order (left → root → right).
+let rec fold (folder: int -> int -> int -> int) (state: int) (node: MapNode) : int =
+    match node with
+    | Empty -> state
+    | Node(k, v, l, r) ->
+        let s1 = fold folder state l
+        let s2 = folder s1 k v
+        fold folder s2 r
+
+/// Iterate over all key-value pairs in ascending key order.
+let rec iter (action: int -> int -> unit) (node: MapNode) : unit =
+    match node with
+    | Empty -> ()
+    | Node(k, v, l, r) ->
+        iter action l
+        action k v
+        iter action r
+
+/// Map values, keeping keys unchanged.  Returns a new map.
+let rec mapValues (mapping: int -> int -> int) (node: MapNode) : MapNode =
+    match node with
+    | Empty -> Empty
+    | Node(k, v, l, r) ->
+        Node(k, mapping k v, mapValues mapping l, mapValues mapping r)
+
+/// Filter entries by predicate, rebuilding the tree.
+let rec filter (predicate: int -> int -> bool) (node: MapNode) : MapNode =
+    match node with
+    | Empty -> Empty
+    | Node(k, v, l, r) ->
+        let fl = filter predicate l
+        let fr = filter predicate r
+        if predicate k v then Node(k, v, fl, fr)
+        else mergeInto fr fl
+
+/// Check if any entry satisfies the predicate.
+let rec exists (predicate: int -> int -> bool) (node: MapNode) : bool =
+    match node with
+    | Empty -> false
+    | Node(k, v, l, r) ->
+        if predicate k v then true
+        elif exists predicate l then true
+        else exists predicate r
+
+/// Check if all entries satisfy the predicate.
+let rec forAll (predicate: int -> int -> bool) (node: MapNode) : bool =
+    match node with
+    | Empty -> true
+    | Node(k, v, l, r) ->
+        if not (predicate k v) then false
+        elif not (forAll predicate l) then false
+        else forAll predicate r
+
 /// Convert to a list of (key, value) pairs in ascending key order.
 let rec private toListAcc (acc: (int * int) list) (node: MapNode) : (int * int) list =
     match node with

@@ -2268,3 +2268,37 @@ let testSeqDistinct () : int =
 
 let testListDistinctBy () : int =
     [1; 2; 3; 4; 5; 6] |> List.distinctBy (fun x -> x % 3) |> List.length  // 3
+
+// ── Phase 3: Exception handling ──────────────────────────────────
+
+/// try/with catch-all — failwith throws, handler recovers
+let testTryCatchBasic () : int =
+    try
+        failwith "boom"
+        0
+    with _ -> 42  // 42
+
+/// try/with — normal path (no exception)
+let testTryCatchNoThrow () : int =
+    try
+        10 + 20
+    with _ -> 0  // 30
+
+/// Nested try/with — inner handler catches
+let testTryCatchNested () : int =
+    try
+        try
+            failwith "inner"
+            0
+        with _ -> 100
+    with _ -> 200  // 100 (inner handler catches)
+
+/// try/with — exception in computation, handler returns fallback
+let testTryCatchFallback () : int =
+    let result =
+        try
+            let x = 10
+            failwith "error"
+            x + 5
+        with _ -> 99
+    result  // 99

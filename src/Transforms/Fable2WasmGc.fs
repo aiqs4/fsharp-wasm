@@ -2226,6 +2226,7 @@ let buildWModule (ctx: Ctx) : WModule =
                     Some { InternalName = f.Name; ExportName = f.Name; Kind = ExportFunc }
                 else None)
         DataSegments = []
+        Tags = [ { Name = "$fsharp_exn"; ParamTypes = [] } ]
         Start = None
     }
 

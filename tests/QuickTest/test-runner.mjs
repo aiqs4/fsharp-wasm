@@ -676,6 +676,12 @@ check("string interp length → 12",        12, exp.testStringInterp());
 check("Seq.distinct 4 distinct → 4",       4, exp.testSeqDistinct());
 check("List.distinctBy 3 groups → 3",      3, exp.testListDistinctBy());
 
+console.log("\n─── Phase 3: Exception handling ─────");
+check("try/with catch-all → 42",            42, exp.testTryCatchBasic());
+check("try/with no throw → 30",            30, exp.testTryCatchNoThrow());
+check("try/with nested → 100",            100, exp.testTryCatchNested());
+check("try/with fallback → 99",            99, exp.testTryCatchFallback());
+
 console.log(`\n────────────────────────────────────────────────`);
 console.log(`  ${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

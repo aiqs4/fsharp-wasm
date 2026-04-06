@@ -2302,3 +2302,34 @@ let testTryCatchFallback () : int =
             x + 5
         with _ -> 99
     result  // 99
+
+// ── Phase 2: Map extended operations ─────────────────────────────
+
+/// Map.isEmpty — check count of empty map
+let testMapIsEmpty () : int =
+    let e = Map.ofList ([] : (int * int) list)
+    let m = Map.ofList [(1, 10)]
+    Map.count e + Map.count m  // 0 + 1 = 1
+
+/// Map.remove — remove a key
+let testMapRemove () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    let m2 = Map.remove 2 m
+    Map.count m2  // 2
+
+/// Map.toList — convert to list, check length
+let testMapToList () : int =
+    let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
+    Map.toList m |> List.length  // 3
+
+/// Map add + find round-trip with more keys (5 elements)
+let testMapLargeAddFind () : int =
+    let m = Map.ofList [(10, 100); (20, 200); (30, 300); (40, 400); (50, 500)]
+    Map.find 30 m  // 300
+
+/// Map.find raises on missing key, caught by try/with
+let testMapFindRaises () : int =
+    try
+        let m = Map.ofList [(1, 10); (2, 20)]
+        Map.find 99 m
+    with _ -> -1  // -1

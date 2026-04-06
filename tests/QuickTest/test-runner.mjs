@@ -682,6 +682,13 @@ check("try/with no throw → 30",            30, exp.testTryCatchNoThrow());
 check("try/with nested → 100",            100, exp.testTryCatchNested());
 check("try/with fallback → 99",            99, exp.testTryCatchFallback());
 
+console.log("\n─── Phase 2: Map extended operations ─────");
+check("Map empty count + 1 → 1",             1, exp.testMapIsEmpty());
+check("Map.remove → 2",                     2, exp.testMapRemove());
+check("Map.toList length → 3",              3, exp.testMapToList());
+check("Map.add+find 30→300",              300, exp.testMapLargeAddFind());
+check("Map.find missing → -1",             -1, exp.testMapFindRaises());
+
 console.log(`\n────────────────────────────────────────────────`);
 console.log(`  ${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

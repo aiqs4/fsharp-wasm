@@ -32,7 +32,7 @@ let rec add (key: int) (value: int) (tree: MapNode) : MapNode =
     | Node(k, v, l, r) ->
         if key < k then Node(k, v, add key value l, r)
         elif key > k then Node(k, v, l, add key value r)
-        else Node(key, value, l, r)   // replace
+        else Node(k, value, l, r)   // replace
 
 /// Look up a key.  Returns None when absent.
 let rec tryFind (key: int) (tree: MapNode) : int option =

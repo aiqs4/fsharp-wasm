@@ -168,7 +168,7 @@ let trySetInline
 /// For the WasmGC synchronous MVP, Async<T> is just T — all computations
 /// are evaluated immediately and synchronously.
 let tryAsyncInline
-        (_ctx: Ctx)
+        (ctx: Ctx)
         (importStem: string)
         (selector: string)
         (wArgs: WExpr list)

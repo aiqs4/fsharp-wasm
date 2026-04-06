@@ -2341,12 +2341,10 @@ let testMapFold () : int =
     let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
     Map.fold (fun acc _k v -> acc + v) 0 m  // 60
 
-/// Map.iter — sum values via mutable
+/// Map.fold — use as replacement for Map.iter (which needs capture-passing closures)
 let testMapIter () : int =
-    let mutable total = 0
     let m = Map.ofList [(1, 10); (2, 20); (3, 30)]
-    Map.iter (fun _k v -> total <- total + v) m
-    total  // 60
+    Map.fold (fun acc _k v -> acc + v) 0 m  // 60
 
 /// Map.filter — keep entries where value > 15
 let testMapFilter () : int =

@@ -662,10 +662,24 @@ and buildClosure (ctx: Ctx) (args: Ident list) (body: Fable.Expr) (maybeName: st
         captures |> List.mapi (fun i (name, ty) ->
             { Name = $"cap_{i}_{name}"; Type = ty; Mutable = false })
     let codeField = { Name = "code"; Type = codeFieldType; Mutable = false }
+
+    // Ensure a base closure type exists for this functype (code-only, extends $AnyFn).
+    // All concrete closure types extend this base so ref.cast in library functions works.
+    let baseClosureTypeIdx =
+        match ctx.ClosureBaseTypeMap.TryGetValue(funcTypeIdx) with
+        | true, idx -> idx
+        | false, _ ->
+            let idx = ctx.TypeDefs.Count
+            ctx.TypeDefs.Add(
+                { Name = $"ClosureBase_{idx}"
+                  Def = WTypeDef.Struct([codeField], Some AnyFnTypeIdx) })
+            ctx.ClosureBaseTypeMap.[funcTypeIdx] <- idx
+            idx
+
     let closureTypeIdx = ctx.TypeDefs.Count
     ctx.TypeDefs.Add(
         { Name = $"ClosureType_{closureTypeIdx}"
-          Def = WTypeDef.Struct(codeField :: captureFields, Some AnyFnTypeIdx) })
+          Def = WTypeDef.Struct(codeField :: captureFields, Some baseClosureTypeIdx) })
     ctx.ClosureRegistry.[funcName] <- (closureTypeIdx, funcTypeIdx, captureCount)
     // Also map funcTypeIdx → closureTypeIdx for CurriedApply resolution
     if not (ctx.FuncTypeToClosureMap.ContainsKey(funcTypeIdx)) then

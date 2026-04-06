@@ -691,7 +691,7 @@ check("Map.find missing → -1",             -1, exp.testMapFindRaises());
 
 console.log("\n─── Phase 2b: Map higher-order operations ─────");
 check("Map.fold sum values → 60",          60, exp.testMapFold());
-check("Map.iter sum via mutable → 60",     60, exp.testMapIter());
+check("Map.fold sum (alt iter) → 60",      60, exp.testMapIter());
 check("Map.filter v>15 → 2",                2, exp.testMapFilter());
 check("Map.exists v>25 → 1",                1, exp.testMapExists());
 check("Map.forall v>=10 → 1",               1, exp.testMapForall());

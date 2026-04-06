@@ -727,8 +727,9 @@ let fixClosureApply (typeDefs: seq<WTypeDeclEntry>) (functions: WFuncDecl list) 
                 | _ -> None
             | _ -> None)
         // Group by funcTypeIdx and pick the closure type with fewest fields
-        // (just "code", no captures) — this avoids illegal cast at runtime when
-        // the actual closure may have a different capture layout.
+        // (the "base" closure type = just the code field). All concrete closure
+        // types extend this base, so ref.cast to it works for any closure of
+        // the same functype regardless of captures.
         |> Seq.groupBy fst
         |> Seq.map (fun (fti, pairs) ->
             let bestClosureIdx =

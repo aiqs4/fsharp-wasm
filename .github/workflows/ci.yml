@@ -33,7 +33,7 @@ jobs:
           node-version: '22'
 
       - name: Cache NuGet packages
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ hashFiles('**/*.fsproj', '**/global.json') }}
@@ -42,7 +42,7 @@ jobs:
       # Cache the patched fsc.dll — only rebuild when vendor/fsharp submodule HEAD changes.
       - name: Cache patched fsc.dll
         id: cache-fsc
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: vendor/fsharp/artifacts/bin/fsc/Release/net10.0
           key: fsc-${{ runner.os }}-${{ hashFiles('vendor/fsharp') }}
